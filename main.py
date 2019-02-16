@@ -1,6 +1,9 @@
 import pandas as pd
 
-from pandas import DataFrame
+province = input('省份：')
+case_type = input('案件类型（民事，刑事，行政）：')
+about_asset = int(input('是否涉及财产（0不涉及 1涉及）：'))
+base_asset = int(input('涉案金额：'))
 
 # 各省参考数据汇总
 # province	case_type	about_asset	min_asset	max_asset	base_data	add_data	min_base_data
@@ -133,7 +136,7 @@ base_data = [
     ['福建', '行政', 1, 10000000, 50000000, '171800-177000', '0.007-0.007', None],
     ['福建', '行政', 1, 50000000, None, '451800-457000', '0.0035-0.0035', None],
 
-['山东', '民事', 0, None, None, '2500~12000元/件', None, None],
+    ['山东', '民事', 0, None, None, '2500~12000元/件', None, None],
     ['山东', '民事', 1, None, 10000, '2500~3000元/件', None, None],
     ['山东', '民事', 1, 10000, 100000, '2500-3000', '0.06-0.09', None],
     ['山东', '民事', 1, 100000, 500000, '7900-11100', '0.05-0.06', None],
@@ -159,9 +162,11 @@ base_data = [
 
 ]
 
+# 构建DataFrame
 columns = ['province', 'case_type', 'about_asset', 'min_asset', 'max_asset', 'base_data', 'add_data', 'min_base_data']
-
 df = pd.DataFrame(data=base_data, columns=columns)
 
 # 筛选
-df[df['case_type'] == '行政']
+df = df[(df['province'] == province) & (df['case_type'] == case_type) & (df['about_asset'] == about_asset)]
+
+print(df)
