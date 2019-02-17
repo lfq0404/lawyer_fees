@@ -2,13 +2,13 @@ import pandas as pd
 
 import re
 
-# province = input('省份：')
-# case_type = input('案件类型（民事，刑事，行政）：')
-# about_asset = int(input('是否涉及财产（0不涉及 1涉及）：'))
-# if about_asset:
-#     base_asset = int(input('案件标的：'))
+province = input('省份：')
+case_type = input('案件类型（民事，刑事，行政）：')
+about_asset = int(input('是否涉及财产（0不涉及 1涉及）：'))
+if about_asset:
+    base_asset = int(input('案件标的：'))
+# province, case_type, about_asset, base_asset = '上海', '刑事', 1, 100000000
 
-province, case_type, about_asset, base_asset = '上海', '刑事', 1, 10
 # 各省参考数据汇总
 # province	case_type	about_asset	min_asset	max_asset	base_data	add_data	min_base_data
 base_data = [
@@ -174,7 +174,7 @@ class Fees:
         """
         self.data = str(data)
         num_list = re.findall('[\d\.]+', self.data)
-        self.num1, self.num2 = num_list[0], num_list[1] if len(num_list) > 1 else None
+        self.num1, self.num2 = float(num_list[0]), float(num_list[1]) if len(num_list) > 1 else None
 
     def __repr__(self):
         """
@@ -200,9 +200,9 @@ class Fees:
         :return:
         """
         if other.num2 is None:
-            return Fees(str(float(self.num1) + float(other.num1)) + '-' + str(float(self.num2) + float(other.num1)))
+            return Fees(str(self.num1 + other.num1) + '-' + str(self.num2 + other.num1))
         else:
-            return Fees(str(float(self.num1) + float(other.num1)) + '-' + str(float(self.num2) + float(other.num2)))
+            return Fees(str(self.num1 + other.num1) + '-' + str(self.num2 + other.num2))
 
     def __mul__(self, other):
         """
@@ -211,11 +211,9 @@ class Fees:
         :return:
         """
         if other.num2 is None:
-            # print(str(float(self.num1) * float(other.num1)))
-            # print(str(float(self.num2) * float(other.num1)))
-            return Fees(str(float(self.num1) * float(other.num1)) + '-' + str(float(self.num2) * float(other.num1)))
+            return Fees(str(self.num1 * other.num1) + '-' + str(self.num2 * other.num1))
         else:
-            return Fees(str(float(self.num1) * float(other.num1)) + '-' + str(float(self.num2) * float(other.num2)))
+            return Fees(str(self.num1 * other.num1) + '-' + str(self.num2 * other.num2))
 
     def __getitem__(self, item):
         """
@@ -279,4 +277,3 @@ if about_asset:
 # 如果没有涉及财产，则直接返回base_data
 else:
     print('参考费用为：', df['base_data'].values[0])
-
