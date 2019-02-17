@@ -2,12 +2,12 @@ import pandas as pd
 
 import re
 
-province = input('省份：')
-case_type = input('案件类型（民事，刑事，行政）：')
-about_asset = int(input('是否涉及财产（0不涉及 1涉及）：'))
-if about_asset:
-    base_asset = int(input('案件标的：'))
-# province, case_type, about_asset, base_asset = '上海', '刑事', 1, 100000000
+# province = input('省份：')
+# case_type = input('案件类型（民事，刑事，行政）：')
+# about_asset = int(input('是否涉及财产（0不涉及 1涉及）：'))
+# if about_asset:
+#     base_asset = int(input('案件标的：'))
+province, case_type, about_asset, base_asset = '山东', '刑事', 1, 99999999999
 
 # 各省参考数据汇总
 # province	case_type	about_asset	min_asset	max_asset	base_data	add_data	min_base_data
@@ -250,14 +250,15 @@ df = df[(df['province'] == province) & (df['case_type'] == case_type) & (df['abo
 # 如果涉及财产，返回案件标的对应的值
 if about_asset:
     df = df[(df['min_asset'] < base_asset) & (df['max_asset'] >= base_asset)]
-    # 如果base_data中存在中文，则直接返回base_data
+
+    # 如果base_data中存在中文，则说明是固定的值，直接返回base_data
     if re.search('[\u4e00-\u9fa5]', df['base_data'].values[0]):
         print('base_data中中文的值为：', df['base_data'].values[0])
         print('参考费用为：', df['base_data'].values[0])
 
     # 若没有中文，则进行计算后返回
     else:
-        # 第一档
+        # 第一档：直接计算，不用进行累加
         if df['min_asset'].values[0] == float('-inf'):
             add_asset = base_asset  # 需要纳入计算的钱
             end_asset = Fees(df['base_data'].values[0]) * Fees(add_asset)  # 需要累加的值
@@ -266,13 +267,16 @@ if about_asset:
                 end_asset[0] = df['min_base_data'].values[0]
                 if df['min_base_data'].values[0] > end_asset[1]:
                     end_asset[1] = df['min_base_data'].values[0]
-        # 其他档
+        # 其他档：base_data + 需要累加的值
         else:
             add_asset = base_asset - df['min_asset'].values[0]  # 需要纳入计算的钱
-            add_money = Fees(df['add_data'].values[0]) * Fees(add_asset)  # 需要累加的值
-            end_asset = Fees(df['base_data'].values[0]) + add_money  # 最终的结算结果
-
-        print('参考费用为：', end_asset)
+            # 对山东的“协定”做特殊判断
+            if re.search('[\u4e00-\u9fa5]', df['add_data'].values[0]):
+                print('参考费用为：{}'.format(df['add_data'].values[0]))
+            else:
+                add_money = Fees(df['add_data'].values[0]) * Fees(add_asset)  # 需要累加的值
+                end_asset = Fees(df['base_data'].values[0]) + add_money  # 最终的结算结果
+                print('参考费用为：', end_asset)
 
 # 如果没有涉及财产，则直接返回base_data
 else:
